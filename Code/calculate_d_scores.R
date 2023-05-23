@@ -214,9 +214,11 @@ d_ans$Sample<-d_ans_short_name
 source("Code/Fig_makers.R")
 #create figure 3 and 4
 pdf(paste0("Output/D_Scores",Sys.Date(),".pdf"))
+par(mar=c(5,8,2,2))
 dscore_mkr(d_ans)
 dev.off()
 pdf(paste0("Output/alpha_values",Sys.Date(),".pdf"))
+par(mar=c(5,8,2,2))
 alpha_mkr(alphas)
 dev.off()
 

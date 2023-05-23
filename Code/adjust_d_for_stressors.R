@@ -1,7 +1,7 @@
 
 
 #refit D in the while accounting for some of the potential mechanisms of D
-setwd("/Volumes/Ratatoskr/Work/PugetSound/Development/latent_disturbance_bioassessment/")
+setwd("path/to/latent_disturbance_bioassessment/")
 #grab the unadjusted d-scores
 d_dat<-read.csv("Data/Model/D_ScoresPriors.csv")
 
@@ -58,7 +58,7 @@ for(i in nms){
 }
 
 #add the stressors to be adjusted for to the data.frame of residuals
-res<-data.frame(res_new,sed_dat[match(rownames(res_new),sed_dat$BenthosSample),c("Sed_TOC","Sed_TN")])
+res<-data.frame(res_new,sed_dat[match(rownames(res_new),sed_dat$Sample),c("Sed_TOC","Sed_TN")])
 
 #set the "non-detect value of TN (i.e., 0.1) to zero
 res$Sed_TN[res$Sed_TN==.1]<-0
@@ -117,7 +117,8 @@ cor(d_ans$est_adj,res$Sed_TOC)
 
 #grab the sediment data and merge with the estimates of d
 df_stress<-merge(merge(d_dat,d_ans,by="Sample"),sed_dat,by="Sample")
-stressors<-8:21
+names(df_stress)
+stressors<-8:19
 tabl<-cbind(sapply(df_stress[,stressors],function(x)round(cor.test(x,df_stress$est,use="pairwise.complete.obs")$estimate,3)),sapply(df_stress[,stressors],function(x)round(cor.test(x,df_stress$est,use="pairwise.complete.obs")$p.value,3)))
 tabl[which(tabl[,2]<0.05),]
 
@@ -146,8 +147,8 @@ dscore_mkr<-function(data,main="",colr="black"){
   abline(v=0,lwd=2)
   points(data$est[ord],1:len,pch=21,bg=colr,cex=1.25)
   axis(side=2,1:len,labels = data$Sample[ord],las=T,cex.axis=.75)
-  mtext("Station_Year_Rep",side = 2,cex=1.5,padj=-8)
-  mtext("Disturbance Score",side = 1,cex=1.5,padj=3)
+  mtext("Sample (Station_Year_Rep)",side = 2,cex=1.5,padj=-8)
+  mtext("Disturbance Index (D)",side = 1,cex=1.5,padj=3)
 }
 
 ord<-order(df_plot$est)
@@ -168,7 +169,7 @@ ord_a<-order(alphas$est)
 len_a<-124
 pdf("Output/alpha_change_TOC_TN.pdf",width = 8,height =8)
 par(oma=c(0,0,0,0),mar=c(5,9,1,1))
-plot(alphas$est[ord_a],1:len_a,pch=21,bg="grey",yaxt='n',ylab="",xlab="Sensitivity Index",xlim = c(-.8,.8))
+plot(alphas$est[ord_a],1:len_a,pch=21,bg="grey",yaxt='n',ylab="",xlab=bquote("Sensitivity Index ("*alpha*")"),xlim = c(-.8,.8),cex.lab=1.5)
 arrows(alphas$est[ord_a],1:len_a,alphas$est[ord_a]+1.96*alphas$se[ord_a],length = 0.1,angle = 90,col="grey")
 arrows(alphas$est[ord_a],1:len_a,alphas$est[ord_a]-1.96*alphas$se[ord_a],length = 0.1,angle = 90,col="grey")
 arrows(alphas_new$est[ord_a],1:len_a,alphas_new$est[ord_a]+1.96*alphas_new$se[ord_a],length = 0.1,angle = 90,col="black")
