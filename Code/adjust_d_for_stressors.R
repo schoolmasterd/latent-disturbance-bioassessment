@@ -177,7 +177,7 @@ arrows(alphas_new$est[ord_a],1:len_a,alphas_new$est[ord_a]-1.96*alphas_new$se[or
 points(alphas_new$est[ord_a],1:len_a,pch=21,bg="white")
 
 legend("topleft",legend = c(expression(alpha),expression(tilde(alpha))),pch=21,pt.bg = c("grey","white"),bty='n')
-axis(side = 2,at = 1:len_a,labels = alphas$names,cex.axis=.5,las=T)
+axis(side = 2,at = 1:len_a,labels = alphas$names[ord_a],cex.axis=.5,las=T)
 mtext("Taxon",side = 2,cex=1.5,padj=-7.5)
 dev.off()
 alphas_new
