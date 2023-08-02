@@ -148,7 +148,7 @@ dscore_mkr<-function(data,main="",colr="black"){
   points(data$est[ord],1:len,pch=21,bg=colr,cex=1.25)
   axis(side=2,1:len,labels = data$Sample[ord],las=T,cex.axis=.75)
   mtext("Sample (Station_Year_Rep)",side = 2,cex=1.5,padj=-8)
-  mtext("Disturbance Index (D)",side = 1,cex=1.5,padj=3)
+  mtext(expression("Disturbance Score" (italic("D"))),side = 1,cex=1.5,padj=3)
 }
 
 ord<-order(df_plot$est)
@@ -156,9 +156,9 @@ len<-length(ord)
 pdf("Output/d_score_change_TOC_TN.pdf",width = 8,height =8)
 par(oma=c(0,0,0,0),mar=c(5,10,1,1))
 dscore_mkr(df_plot[,1:3],colr = "grey")
-arrows(df_stress$est_adj[ord],1:len,df_stress$est_adj[ord]+1.96*d_ans$se[ord],length = 0.1,angle = 90,col="black")
-arrows(df_stress$est_adj[ord],1:len,df_stress$est_adj[ord]-1.96*d_ans$se[ord],length = 0.1,angle = 90,col="black")
-points(df_stress$est_adj[ord],1:len,pch=21,bg="white",cex=1.25)
+arrows(df_plot$est_adj[ord],1:len,df_plot$est_adj[ord]+1.96*df_plot$se_adj[ord],length = 0.1,angle = 90,col="black")
+arrows(df_plot$est_adj[ord],1:len,df_plot$est_adj[ord]-1.96*df_plot$se_adj[ord],length = 0.1,angle = 90,col="black")
+points(df_plot$est_adj[ord],1:len,pch=21,bg="white",cex=1.25)
 
 abline(v=0,lwd=2)
 legend("topleft",legend = c("D-Score",expression(tilde(D)-Score)),pch=21,pt.bg = c("grey","white"),bty='n')

@@ -104,7 +104,7 @@ pct_deviance<-sapply(sp_nms,function(x)fts[[x]]$dev.ratio[fts[[x]]$lambda==lambd
 #look at the distribution of deviance explained
 
 #Figure 2
-hist(pct_deviance,xlab="Percent Devianace Explained",main="")
+hist(pct_deviance,xlab="Proportion Deviance Explained",main="")
 abline(v=.2,lwd=2,lty=2)
 
 #grab those with pct_deviance .20 plus some special considerations
