@@ -148,7 +148,7 @@ dscore_mkr<-function(data,main="",colr="black"){
   points(data$est[ord],1:len,pch=21,bg=colr,cex=1.25)
   axis(side=2,1:len,labels = data$Sample[ord],las=T,cex.axis=.75)
   mtext("Sample (Station_Year_Rep)",side = 2,cex=1.5,padj=-8)
-  mtext(expression("Disturbance Score" (italic("D"))),side = 1,cex=1.5,padj=3)
+  mtext(expression("Disturbance Score " (italic("D"))),side = 1,cex=1.5,padj=3)
 }
 
 ord<-order(df_plot$est)
