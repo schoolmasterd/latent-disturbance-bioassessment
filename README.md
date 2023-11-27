@@ -1,15 +1,15 @@
 
 This code accompanies the manuscript:
-Bioassassement for ecosystems with complex communities and environmental gradients
+A new method for bioassassement for ecosystems with complex communities and environmental gradients
 
 Donald R. Schoolmaster Jr.<sup>1</sup>, Valerie Partridge<sup>2</sup>
 
-1 U.S. Geological Survey, Wetland and Aquatic Research Center
+1 U.S. Geological Survey, Wetland and Aquatic Research Center. email: schoolmasterd@usgs.gov
 
 2 State of Washington, Department of Ecology
 
 The Code folder contains four files.
-The script "calculate_d_scores.R" follows the manuscript's section "Case study: development of a Puget Sound Marine Benthic Index." It uses the designated training data to calcuated D scores for the training period and estimate and save the parameters necessary for updating with other data. This script contains code for creating figures 2-4 of the manuscript
+The script "calculate_d_scores.R" follows the manuscript's section "Case study: development of a Puget Sound Marine Benthic Index." It uses the designated training data to calculated D scores for the training period and estimate and save the parameters necessary for updating with other data. This script contains code for creating figures 2-4 of the manuscript
 
 The script "adjust_d_for_stressors.R" follows the manuscript's subsection "Using D to identify and quantify stressors." It shows a worked example of adjusting the D scores for TOC and TN to determine what proportion of the D scores can be attributed to those stressors. This script contains code for creating Figures 6 and 7 and Table 2.
 
@@ -30,3 +30,5 @@ The folder "Model" is the destination of the parameters needed for updating the 
 The Output folder is the main destination for the figures created by the scripts.
 
 USGS IP-155119
+
+approx. runtime: 10 min
