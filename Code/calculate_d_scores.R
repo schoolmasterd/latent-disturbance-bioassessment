@@ -1,5 +1,4 @@
 ####This code reads in training data from the PSSMP and fits taxa models to environmental variables####
-#this version separates the signal between fines and TOC
 
 #load packages
 library(glmnet)
@@ -9,10 +8,11 @@ library(reshape2)
 
 ##load data##
 
-#This is be done automatically by starting RStudio by double clicking the Puget_Sound_MBI.Rproj
-#otherwise uncomment, update and run the following 2 lines.
-path<-"your/path/to/latent_disturbance_bioassessment/"
-setwd(path)
+#This can be done automatically by starting RStudio by double clicking the Puget_Sound_MBI.Rproj
+#otherwise uncomment (remove the #), update and run the following 2 lines.
+
+#path<-"your/path/to/latent_disturbance_bioassessment/"
+#setwd(path)
 
 
 #load species data#
@@ -45,9 +45,11 @@ ubiq<-names(occs[occs/dim(sp_dat)[1]>=.3])
 max(occs/dim(sp_dat)[1])
 tail(occs[order(occs)])
 lost_em<-which(occs<=10)
+
 #look at names of rare taxa
 length(lost_em)
 names(occs)[lost_em]
+
 #remove them from the data.frame
 sp_dat<-sp_dat[,-(which(occs<=10))]
 
@@ -59,9 +61,8 @@ sp_nms<-names(sp_dat)
 #in this case these are in columns 1-12
 df_test<-data.frame(df[,1:12],sp_dat)
 
-#linearize the relationshiop between sed_TOC and Fines
-#plot(log((df_test$Fines/100)/(1-df_test$Fines/100))~sqrt(df$Sed_TOC))
-#cor(log((df_test$Fines/100)/(1-df_test$Fines/100)),sqrt(df$Sed_TOC))
+#linearize the relationship between sed_TOC and Fines, then remove the sed_TOC signal
+#from the Fines variable. This "cleaned" version of Fines will be used for the analysis
 f<-lm((log((df_test$Fines/100)/(1-df_test$Fines/100))~sqrt(df$Sed_TOC)),weights = train_weights)
 
 #use this to replace fines in the E data
@@ -72,19 +73,18 @@ df$Fines<-resid(f)
 #grab the vars for E
 evars<-c("Depth","Penetration","Salinity","Temperature","Fines","Gravel")
 env_vars<-df[,evars]
-#center them and keep the value used to center each
 
-col_means_mod_vars<-apply(env_vars,2,sum)*1/sum(train_weights)
+#center them and keep the value used to center each
+col_means_mod_vars<-apply(env_vars,2,sum) * 1/sum(train_weights)
 col_sd_mod_vars<-apply(env_vars,2,sd)
 env_vars<-sweep(env_vars,2,col_means_mod_vars,FUN = "-")
-#env_vars<-sweep(env_vars,2,col_sd_mod_vars,FUN = "/")
 apply(env_vars,2,mean)
 
-
+#collect the resulting variable into a single dataframe
 df_test<-data.frame(df[,"Sample"],env_vars,sp_dat)
 head(df_test)
 
-# fit taxa models using lasso regularization and cross-validation to select "lambda" parameter
+####fit taxa models using lasso regularization and cross-validation to select "lambda" parameter###
 fts<-list()
 lambda_min<-rep(NA,length(sp_nms))
 names(lambda_min)<-sp_nms
@@ -99,6 +99,7 @@ for(i in sp_nms){
   tryCatch({fts[[i]]<-glmnet::glmnet(x,y,alpha=1,family = "binomial", lambda = cv.lasso$lambda,type.logistic = "modified.Newton",weights = train_weights)},warning=function(w)print(i))
 }
 
+####Select the taxa to retain in the analysis####
 #calc percent deviance
 pct_deviance<-sapply(sp_nms,function(x)fts[[x]]$dev.ratio[fts[[x]]$lambda==lambda_min[x]])
 #look at the distribution of deviance explained
@@ -113,7 +114,6 @@ c("Leitoscoloplos_pugettensis",
 "Paraprionospio",
 "Micronephthys_cornuta",
 "Prionospio_lighti"))
-#colony_spp%in%nms
 
 #look at the distribution of deviance explained for this subset of taxa
 hist(pct_deviance[nms])
@@ -124,7 +124,7 @@ length(nms)
 #cleanup column name for first column
 names(df_test)[1]<-"Sample"
 
-#calculate quantile residuals#
+####calculate quantile residuals####
 #this calculates the residuals as related to Dunn & Smyth (1996)
 #if we think of the prediction p(y=1|x) as dividing the interval [0,1], then a
 #and b are used to select the sub-interval based on whether the event was observed
@@ -142,9 +142,9 @@ for(i in nms){
 }
 
 ####set up SEM to calculate D and alphas####
-#check our the distribution of residuals if any ar crazy high (or low) with
-#might deal with those separately to preserve our assumption of species correlation 
-# only through common effects of E
+# check our the distribution of residuals; if any are crazy high (or low) we
+# might choose deal with those separately to preserve our assumption of species correlation 
+# only through common effects of E. See manuscript for discussion 
 res_cor<-cor(res)
 hist(res_cor)
 #set up the model of lavaan
@@ -155,20 +155,19 @@ model<-paste("D=~NA*",paste(colnames(res),sep=" ",collapse ="+"),"\nD~~1*D",sep=
 fit<-sem(model,data = res,meanstructure = FALSE)
 
 #grab the alphas
-#get the estimates
 alpha_est<-fit@ParTable$est[which(fit@ParTable$op=="=~")]
 
-#get the se 
+#get the standard errors
 alpha_se<-fit@ParTable$se[which(fit@ParTable$op=="=~")]
 nsp<-length(nms)
-#grab the alphas
+
+#collect the alphas in a dataframe
 alphas<-data.frame(names=fit@ParTable$rhs[which(fit@ParTable$op=="=~")],
                    est=alpha_est,se=alpha_se)
 #look at them
 alphas
 
-#calculate D using maximum likelihood 
-#wts<-1/alphas$se^2/min(1/alphas$se^2)
+####calculate D using maximum likelihood####
 
 D_ests<-D_ests_new<-list()
 len<-dim(df_test)[1]
@@ -181,7 +180,7 @@ for(i in 1:len){
 #collect the estimates into a single data.frame
 d_ans<-data.frame(Sample=rownames(res),est=sapply(D_ests,"[",1),se=sapply(D_ests,"[",2))
 
-#stuff needed for updating test sets
+####collect and export the data needed for updating test sets####
 
 #write out the coefs estimates for later updating
 sp_coefs<-sapply(nms,function(x)as.vector(coef(fts[[x]],s=lambda_min[x])))
@@ -189,24 +188,25 @@ rownames(sp_coefs)<-(coef(fts[[1]])@Dimnames[[1]])
 
 write.csv(x = data.frame(Parameter=rownames(sp_coefs),sp_coefs),file = "Data/Model/TaxaCoefficients.csv",row.names = F)
 
-#alphas
+#write out the alphas
 write.csv(alphas,"Data/Model/alphas_calibration.csv",row.names = F)
 
-#Means for the carbonation continuous E var
+#write out the Means for the carbonation continuous E var
 col_mod_vars<-c(col_means_mod_vars[c("Depth","Penetration","Salinity","Temperature")],Fines=coef(f),col_means_mod_vars["Gravel"])
 col_mod_vars<-as.matrix(t(col_mod_vars))
 
 write.csv(col_mod_vars,"Data/Model/E_calibration_means.csv",row.names = F)
 
-#prior to output folder and model data/model folder for update
+#write out the prior to output folder and model data/model folder for update
 write.csv(d_ans,"Data/Model/D_ScoresPriors.csv",row.names = F)
 
-#write d-scores to output file with date
+#write out the d-scores to output file with date
 write.csv(d_ans,paste0("Output/D_Scores",Sys.Date(),".csv"),row.names = F)
 
-#create example figures and toss it in the Output folder
+####create example figures and toss it in the Output folder###
 nm_bits<-strsplit(d_ans$Sample,"_")
 
+#clean up names for figure axes
 d_ans_short_name<-paste(sapply(nm_bits,"[",3),sapply(nm_bits,"[",2),sapply(nm_bits,"[",4),sep="_")
 d_ans_short_name
 d_ans$Sample<-d_ans_short_name

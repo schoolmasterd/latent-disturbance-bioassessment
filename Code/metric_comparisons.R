@@ -1,4 +1,4 @@
-
+#This code is used to make Figure 6 of the main text
 
 #get data on taxa
 df<-read.csv("Data/habitat and TOC and species abundances for Long-term 2017 and 2018 samples.csv")
@@ -11,11 +11,11 @@ d_dat<-read.csv("Data/Model/D_ScoresPriors.csv")
 alphas<-read.csv("Data/Model/alphas_calibration.csv")
 nms<-alphas$names
 
-#calcualte richness
+#calculate richness
 taxa_rich<-apply(sp_dat[,nms],1,sum)
-#calulate dominance
+#calculate dominance
 dom<-apply((sp_dat[,nms]/apply(sp_dat[,nms],1,sum))^2,1,sum)
-#calcuate an ambi-like
+#calculate an ambi-like
 
 bc_scores<-read.csv("Data/AMBI EG for 551 taxa in 2017-2018.csv")
 #grab our taxa

@@ -1,6 +1,7 @@
+#This code is used to remove the effects of specific stressors from D to result
+# in the estimate D~
 
-
-#refit D in the while accounting for some of the potential mechanisms of D
+#refit D while accounting for some of the potential mechanisms of D
 setwd("path/to/latent_disturbance_bioassessment/")
 #grab the unadjusted d-scores
 d_dat<-read.csv("Data/Model/D_ScoresPriors.csv")
@@ -11,7 +12,7 @@ df<-read.csv("Data/habitat and TOC and species abundances for Long-term 2017 and
 sed_dat<-read.csv("Data/sediment chemistry for 2017-2018 baseline.csv")
 head(sed_dat)
 
-#grab the update stuff
+#grab the update necessary data from previous analyses
 scale_vars<-read.csv("Data/Model/E_calibration_means.csv")
 alphas<-read.csv("Data/Model/alphas_calibration.csv")
 sp_coefs<-read.csv("Data/Model/TaxaCoefficients.csv")
@@ -113,7 +114,7 @@ cor(d_ans$est_adj,res$Sed_TN)
 
 cor(d_dat$est,res$Sed_TOC)
 cor(d_ans$est_adj,res$Sed_TOC)
-#wow math works!
+#this shows that it works!
 
 #grab the sediment data and merge with the estimates of d
 df_stress<-merge(merge(d_dat,d_ans,by="Sample"),sed_dat,by="Sample")
